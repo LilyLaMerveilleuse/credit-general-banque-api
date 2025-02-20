@@ -1,5 +1,6 @@
 package cgb.transfert.controllers;
 
+import cgb.transfert.entities.Account;
 import cgb.transfert.entities.Transfer;
 import cgb.transfert.services.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,13 +43,13 @@ public class TransferController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/source/{accountNumber}")
-    public List<Transfer> getTransfersBySourceAccount(@PathVariable String accountNumber) {
+    @GetMapping("/source")
+    public List<Transfer> getTransfersBySourceAccount(@RequestBody Account accountNumber) {
         return transferService.getTransfersBySourceAccount(accountNumber);
     }
 
-    @GetMapping("/destination/{accountNumber}")
-    public List<Transfer> getTransfersByDestinationAccount(@PathVariable String accountNumber) {
+    @GetMapping("/destination")
+    public List<Transfer> getTransfersByDestinationAccount(@RequestBody Account accountNumber) {
         return transferService.getTransfersByDestinationAccount(accountNumber);
     }
 }

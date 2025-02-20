@@ -1,5 +1,6 @@
 package cgb.transfert.services;
 
+import cgb.transfert.entities.Account;
 import cgb.transfert.entities.Transfer;
 import cgb.transfert.repositories.TransferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +29,6 @@ public class TransferService {
     }
 
     public Transfer saveTransfer(Transfer transfer) {
-        transfer.setTransferDate(LocalDate.now()); // Ajout automatique de la date
         return transferRepository.save(transfer);
     }
 
@@ -36,11 +36,11 @@ public class TransferService {
         transferRepository.deleteById(id);
     }
 
-    public List<Transfer> getTransfersBySourceAccount(String sourceAccount) {
-        return transferRepository.findBySourceAccountNumber(sourceAccount);
+    public List<Transfer> getTransfersBySourceAccount(Account sourceAccount) {
+        return transferRepository.findBySourceAccount(sourceAccount);
     }
 
-    public List<Transfer> getTransfersByDestinationAccount(String destinationAccount) {
-        return transferRepository.findByDestinationAccountNumber(destinationAccount);
+    public List<Transfer> getTransfersByDestinationAccount(Account destinationAccount) {
+        return transferRepository.findByDestinationAccount(destinationAccount);
     }
 }
