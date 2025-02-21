@@ -1,3 +1,5 @@
+-- Pour lancer ce script, modifier application.properties
+
 -- Insertion des comptes
 INSERT INTO Account (account_Number, solde) VALUES
     ('ACC123456', 5000.00),

@@ -1,11 +1,15 @@
+-- Pour lancer ce script, modifier application.properties
+
 DROP TABLE IF EXISTS Transfer;
 DROP TABLE IF EXISTS Account;
 
+-- Création des comptes
 CREATE TABLE Account (
                          account_Number VARCHAR(50) PRIMARY KEY,
                          solde DOUBLE
 );
 
+-- Création des transfers
 CREATE TABLE Transfer (
                           id BIGINT AUTO_INCREMENT PRIMARY KEY,
                           amount DOUBLE NOT NULL,

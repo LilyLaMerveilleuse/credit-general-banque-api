@@ -6,6 +6,8 @@ import lombok.*;
 
 @Entity
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name="Transfer")
 public class Transfer {
     @Id

@@ -2,6 +2,7 @@ package cgb.transfert.controllers;
 
 import cgb.transfert.entities.Account;
 import cgb.transfert.entities.Transfer;
+import cgb.transfert.records.TransferPostRecord;
 import cgb.transfert.services.TransferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -33,23 +34,23 @@ public class TransferController {
     }
 
     @PostMapping
-    public Transfer createTransfer(@RequestBody Transfer transfer) {
+    public Transfer createTransfer(@RequestBody TransferPostRecord transfer) {
         return transferService.saveTransfer(transfer);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransfer(@PathVariable Long id) {
         transferService.deleteTransfer(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/source")
-    public List<Transfer> getTransfersBySourceAccount(@RequestBody Account accountNumber) {
-        return transferService.getTransfersBySourceAccount(accountNumber);
+    @GetMapping("/source/{accountNumber}")
+    public List<Transfer> getTransfersBySourceAccountNumber(@PathVariable String accountNumber) {
+        return transferService.getTransfersBySourceAccountNumber(accountNumber);
     }
 
-    @GetMapping("/destination")
-    public List<Transfer> getTransfersByDestinationAccount(@RequestBody Account accountNumber) {
-        return transferService.getTransfersByDestinationAccount(accountNumber);
+    @GetMapping("/destination/{accountNumber}")
+    public List<Transfer> getTransfersByDestinationAccount(@PathVariable String accountNumber) {
+        return transferService.getTransfersByDestinationAccountNumber(accountNumber);
     }
 }

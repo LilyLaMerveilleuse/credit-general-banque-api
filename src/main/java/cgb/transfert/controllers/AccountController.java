@@ -1,6 +1,7 @@
 package cgb.transfert.controllers;
 
 import cgb.transfert.entities.Account;
+import cgb.transfert.records.AccountPostRecord;
 import cgb.transfert.services.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -32,13 +33,13 @@ public class AccountController {
     }
 
     @PostMapping
-    public Account createAccount(@RequestBody Account account) {
+    public Account createAccount(@RequestBody AccountPostRecord account) {
         return accountService.saveAccount(account);
     }
 
     @DeleteMapping("/{accountNumber}")
     public ResponseEntity<Void> deleteAccount(@PathVariable String accountNumber) {
         accountService.deleteAccount(accountNumber);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok().build();
     }
 }
