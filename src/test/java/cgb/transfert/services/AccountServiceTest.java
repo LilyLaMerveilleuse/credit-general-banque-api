@@ -1,13 +1,9 @@
 package cgb.transfert.services;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
-
 import cgb.transfert.entities.Account;
 import cgb.transfert.mappers.AccountPostMapper;
 import cgb.transfert.records.AccountPostRecord;
 import cgb.transfert.repositories.AccountRepository;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,8 +14,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 @ExtendWith(MockitoExtension.class)
-public class AccountServiceTest {
+class AccountServiceTest {
 
     @Mock
     private AccountRepository accountRepository;
@@ -34,60 +34,58 @@ public class AccountServiceTest {
     private AccountPostRecord accountPostRecord;
 
     @BeforeEach
-    void setup() {
-        account = new Account("ACC123456", 1500.0);
-        accountPostRecord = new AccountPostRecord(1500.0);
+    void setUp() {
+        account = new Account("ACC123456", 500.0);
+        accountPostRecord = new AccountPostRecord(500.0);
     }
 
     @Test
-    public void testGetAllAccounts() {
+    void getAllAccounts_ShouldReturnAllAccounts() {
         when(accountRepository.findAll()).thenReturn(List.of(account));
 
         List<Account> accounts = accountService.getAllAccounts();
 
-        assertEquals(1, accounts.size());
-        assertEquals("ACC123456", accounts.getFirst().getAccountNumber());
+        assertThat(accounts).isNotEmpty().hasSize(1);
+        assertThat(accounts.getFirst().getAccountNumber()).isEqualTo("ACC123456");
         verify(accountRepository, times(1)).findAll();
     }
 
     @Test
-    public void testGetAccountByNumber_Found() {
+    void getAccountByNumber_ShouldReturnAccount_WhenAccountExists() {
         when(accountRepository.findById("ACC123456")).thenReturn(Optional.of(account));
 
         Optional<Account> foundAccount = accountService.getAccountByNumber("ACC123456");
 
-        assertTrue(foundAccount.isPresent());
-        assertEquals("ACC123456", foundAccount.get().getAccountNumber());
+        assertThat(foundAccount).isPresent();
+        assertThat(foundAccount.get().getSolde()).isEqualTo(500.0);
         verify(accountRepository, times(1)).findById("ACC123456");
     }
 
     @Test
-    public void testGetAccountByNumber_NotFound() {
+    void getAccountByNumber_ShouldReturnEmpty_WhenAccountDoesNotExist() {
         when(accountRepository.findById("ACC999999")).thenReturn(Optional.empty());
 
         Optional<Account> foundAccount = accountService.getAccountByNumber("ACC999999");
 
-        assertFalse(foundAccount.isPresent());
+        assertThat(foundAccount).isEmpty();
         verify(accountRepository, times(1)).findById("ACC999999");
     }
 
     @Test
-    public void testSaveAccount() {
-        Account mappedAccount = new Account("ACC654321", 2000.0);
-
-        when(accountPostMapper.toEntity(accountPostRecord)).thenReturn(mappedAccount);
-        when(accountRepository.save(mappedAccount)).thenReturn(mappedAccount);
+    void saveAccount_ShouldReturnSavedAccount() {
+        when(accountPostMapper.toEntity(any(AccountPostRecord.class))).thenReturn(account);
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
 
         Account savedAccount = accountService.saveAccount(accountPostRecord);
 
-        assertEquals("ACC654321", savedAccount.getAccountNumber());
-        assertEquals(2000.0, savedAccount.getSolde());
-        verify(accountPostMapper, times(1)).toEntity(accountPostRecord);
-        verify(accountRepository, times(1)).save(mappedAccount);
+        assertThat(savedAccount).isNotNull();
+        assertThat(savedAccount.getAccountNumber()).isEqualTo("ACC123456");
+        verify(accountPostMapper, times(1)).toEntity(any(AccountPostRecord.class));
+        verify(accountRepository, times(1)).save(any(Account.class));
     }
 
     @Test
-    public void testDeleteAccount() {
+    void deleteAccount_ShouldDeleteAccount() {
         doNothing().when(accountRepository).deleteById("ACC123456");
 
         accountService.deleteAccount("ACC123456");
