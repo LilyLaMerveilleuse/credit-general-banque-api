@@ -35,8 +35,8 @@ class AccountServiceTest {
 
     @BeforeEach
     void setUp() {
-        account = new Account("ACC123456", 500.0);
-        accountPostRecord = new AccountPostRecord(500.0);
+        account = new Account("ACC123456", "John Doe", 500.0);
+        accountPostRecord = new AccountPostRecord("ACC123456", "John Doe", 500.0);
     }
 
     @Test
@@ -46,7 +46,7 @@ class AccountServiceTest {
         List<Account> accounts = accountService.getAllAccounts();
 
         assertThat(accounts).isNotEmpty().hasSize(1);
-        assertThat(accounts.getFirst().getAccountNumber()).isEqualTo("ACC123456");
+        assertThat(accounts.getFirst().getIban()).isEqualTo("ACC123456");
         verify(accountRepository, times(1)).findAll();
     }
 
@@ -79,7 +79,7 @@ class AccountServiceTest {
         Account savedAccount = accountService.saveAccount(accountPostRecord);
 
         assertThat(savedAccount).isNotNull();
-        assertThat(savedAccount.getAccountNumber()).isEqualTo("ACC123456");
+        assertThat(savedAccount.getIban()).isEqualTo("ACC123456");
         verify(accountPostMapper, times(1)).toEntity(any(AccountPostRecord.class));
         verify(accountRepository, times(1)).save(any(Account.class));
     }

@@ -43,25 +43,25 @@ class AccountControllerTest {
 
     @Test
     void getAllAccounts_ShouldReturnListOfAccounts() throws Exception {
-        Account account1 = new Account("ACC123456", 1000.0);
-        Account account2 = new Account("ACC654321", 500.0);
+        Account account1 = new Account("ACC123456", "John Doe", 1000.0);
+        Account account2 = new Account("ACC654321", "Jane Smith", 500.0);
 
         when(accountService.getAllAccounts()).thenReturn(Arrays.asList(account1, account2));
 
         mockMvc.perform(get("/api/accounts"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].accountNumber").value("ACC123456"))
-                .andExpect(jsonPath("$[1].accountNumber").value("ACC654321"));
+                .andExpect(jsonPath("$[0].iban").value("ACC123456"))
+                .andExpect(jsonPath("$[1].iban").value("ACC654321"));
     }
 
     @Test
     void getAccountByNumber_ShouldReturnAccount_WhenFound() throws Exception {
-        Account account = new Account("ACC123456", 1000.0);
+        Account account = new Account("ACC123456", "John Doe", 1000.0);
         when(accountService.getAccountByNumber("ACC123456")).thenReturn(Optional.of(account));
 
         mockMvc.perform(get("/api/accounts/ACC123456"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accountNumber").value("ACC123456"))
+                .andExpect(jsonPath("$.iban").value("ACC123456"))
                 .andExpect(jsonPath("$.solde").value(1000.0));
     }
 
@@ -75,8 +75,8 @@ class AccountControllerTest {
 
     @Test
     void createAccount_ShouldReturnCreatedAccount() throws Exception {
-        AccountPostRecord accountPostRecord = new AccountPostRecord(1500.0);
-        Account savedAccount = new Account("ACC111111", 1500.0);
+        AccountPostRecord accountPostRecord = new AccountPostRecord("ACC111111", "Alice", 1500.0);
+        Account savedAccount = new Account("ACC111111", "Alice", 1500.0);
 
         when(accountService.saveAccount(any(AccountPostRecord.class))).thenReturn(savedAccount);
 
@@ -84,7 +84,8 @@ class AccountControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(accountPostRecord)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accountNumber").value("ACC111111"))
+                .andExpect(jsonPath("$.iban").value("ACC111111"))
+                .andExpect(jsonPath("$.owner_name").value("Alice"))
                 .andExpect(jsonPath("$.solde").value(1500.0));
     }
 
