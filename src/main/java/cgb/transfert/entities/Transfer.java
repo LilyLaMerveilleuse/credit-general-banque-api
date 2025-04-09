@@ -2,6 +2,8 @@ package cgb.transfert.entities;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
+import java.util.UUID;
+
 import lombok.*;
 
 @Entity
@@ -11,17 +13,21 @@ import lombok.*;
 @Table(name="Transfer")
 public class Transfer {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
     private Double amount;
-    private LocalDate transferDate;
+    private LocalDate transfer_date;
     private String description;
 
     @ManyToOne
-    @JoinColumn(name = "sourceAccountNumber", nullable = false)
+    @JoinColumn(name = "status_id", nullable = false)
+    private TransferStatus status;
+
+    @ManyToOne
+    @JoinColumn(name = "source_iban", nullable = false)
     private Account sourceAccount;
 
     @ManyToOne
-    @JoinColumn(name = "destinationAccountNumber", nullable = false)
+    @JoinColumn(name = "destination_iban", nullable = false)
     private Account destinationAccount;
 }

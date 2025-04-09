@@ -5,14 +5,16 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.UUID;
+
 @Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Account {
+@Table(name = "TRANSFERSTATUS")
+public class TransferStatus {
     @Id
-    @Column(name = "iban", nullable = false)
-    private String iban;
-    private String owner_name;
-	private Double solde;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+    private String name;
 }

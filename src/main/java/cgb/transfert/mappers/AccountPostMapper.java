@@ -18,16 +18,9 @@ public class AccountPostMapper {
 
     public Account toEntity(AccountPostRecord accountPostRecord) {
         Account account = new Account();
+        account.setIban(accountPostRecord.iban());
+        account.setOwner_name(accountPostRecord.owner_name());
         account.setSolde(accountPostRecord.solde());
-        account.setAccountNumber(uniqueAccountNumber());
         return account;
-    }
-
-    public String uniqueAccountNumber() {
-        String number;
-        do {
-            number = "ACC" + String.format("%06d", random.nextInt(1000000));
-        } while (accountRepository.existsById(number));
-        return number;
     }
 }

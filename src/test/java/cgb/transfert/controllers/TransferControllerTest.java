@@ -2,6 +2,7 @@ package cgb.transfert.controllers;
 
 import cgb.transfert.entities.Account;
 import cgb.transfert.entities.Transfer;
+import cgb.transfert.entities.TransferStatus;
 import cgb.transfert.records.TransferPostRecord;
 import cgb.transfert.services.TransferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -39,10 +41,8 @@ class TransferControllerTest {
 
     private MockMvc mockMvc;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private Account sourceAccount;
-    private Account destinationAccount;
     private Transfer transfer;
     private TransferPostRecord transferPostRecord;
 
@@ -51,11 +51,11 @@ class TransferControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
         mockMvc = MockMvcBuilders.standaloneSetup(transferController).build();
 
-        sourceAccount = new Account("ACC123456", 5000.0);
-        destinationAccount = new Account("ACC654321", 2000.0);
+        Account sourceAccount = new Account("FR7630006000010000000000001", "Alice Dupont", 5000.00);
+        Account destinationAccount = new Account("FR7630006000010000000000019", "Sophie Fabre", 2000.00);
 
-        transfer = new Transfer(1L, 1000.0, LocalDate.now(), "Test Transfer", sourceAccount, destinationAccount);
-        transferPostRecord = new TransferPostRecord(1000.0, LocalDate.now(), "Test Transfer", "ACC123456", "ACC654321");
+        transfer = new Transfer(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"), 1000.0, LocalDate.now(), "Test Transfer", new TransferStatus(), sourceAccount, destinationAccount);
+        transferPostRecord = new TransferPostRecord(1000.0, LocalDate.now(), "Test Transfer","FR7630006000010000000000001", "FR7630006000010000000000019");
     }
 
     @Test
@@ -69,18 +69,18 @@ class TransferControllerTest {
 
     @Test
     void getTransferById_ShouldReturnTransfer_WhenFound() throws Exception {
-        when(transferService.getTransferById(1L)).thenReturn(Optional.of(transfer));
+        when(transferService.getTransferById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"))).thenReturn(Optional.of(transfer));
 
-        mockMvc.perform(get("/api/transfers/1"))
+        mockMvc.perform(get("/api/transfers/1a2b3c4d-0001-0001-0001-000000000001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.amount").value(1000.0));
     }
 
     @Test
     void getTransferById_ShouldReturnNotFound_WhenTransferDoesNotExist() throws Exception {
-        when(transferService.getTransferById(99L)).thenReturn(Optional.empty());
+        when(transferService.getTransferById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000099999"))).thenReturn(Optional.empty());
 
-        mockMvc.perform(get("/api/transfers/99"))
+        mockMvc.perform(get("/api/transfers/1a2b3c4d-0001-0001-0001-000000099999"))
                 .andExpect(status().isNotFound());
     }
 
@@ -97,7 +97,7 @@ class TransferControllerTest {
 
     @Test
     void deleteTransfer_ShouldReturnOk() throws Exception {
-        Mockito.doNothing().when(transferService).deleteTransfer(1L);
+        Mockito.doNothing().when(transferService).deleteTransfer(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"));
 
         mockMvc.perform(delete("/api/transfers/1"))
                 .andExpect(status().isOk());
@@ -105,18 +105,18 @@ class TransferControllerTest {
 
     @Test
     void getTransfersBySourceAccountNumber_ShouldReturnTransfers() throws Exception {
-        when(transferService.getTransfersBySourceAccountNumber("ACC123456")).thenReturn(Arrays.asList(transfer));
+        when(transferService.getTransfersBySourceAccountNumber("FR7630006000010000000000001")).thenReturn(Arrays.asList(transfer));
 
-        mockMvc.perform(get("/api/transfers/source/ACC123456"))
+        mockMvc.perform(get("/api/transfers/source/FR7630006000010000000000001"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].amount").value(1000.0));
     }
 
     @Test
     void getTransfersByDestinationAccount_ShouldReturnTransfers() throws Exception {
-        when(transferService.getTransfersByDestinationAccountNumber("ACC654321")).thenReturn(Arrays.asList(transfer));
+        when(transferService.getTransfersByDestinationAccountNumber("FR7630006000010000000000019")).thenReturn(Arrays.asList(transfer));
 
-        mockMvc.perform(get("/api/transfers/destination/ACC654321"))
+        mockMvc.perform(get("/api/transfers/destination/FR7630006000010000000000019"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].amount").value(1000.0));
     }

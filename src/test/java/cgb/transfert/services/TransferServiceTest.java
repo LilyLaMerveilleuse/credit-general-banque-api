@@ -2,6 +2,7 @@ package cgb.transfert.services;
 
 import cgb.transfert.entities.Account;
 import cgb.transfert.entities.Transfer;
+import cgb.transfert.entities.TransferStatus;
 import cgb.transfert.mappers.TransferPostMapper;
 import cgb.transfert.records.TransferPostRecord;
 import cgb.transfert.repositories.AccountRepository;
@@ -17,6 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -45,9 +47,10 @@ class TransferServiceTest {
 
     @BeforeEach
     void setUp() {
-        sourceAccount = new Account("ACC123456", 5000.0);
-        destinationAccount = new Account("ACC654321", 2000.0);
-        transfer = new Transfer(1L, 1000.0, LocalDate.now(), "Test Transfer", sourceAccount, destinationAccount);
+        Account sourceAccount = new Account("FR7630006000010000000000001", "Alice Dupont", 5000.00);
+        Account destinationAccount = new Account("FR7630006000010000000000019", "Sophie Fabre", 2000.00);
+
+        transfer = new Transfer(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"), 1000.0, LocalDate.now(), "Test Transfer", new TransferStatus(), sourceAccount, destinationAccount);
         transferPostRecord = new TransferPostRecord(1000.0, LocalDate.now(), "Test Transfer", "ACC123456", "ACC654321");
     }
 
@@ -64,23 +67,23 @@ class TransferServiceTest {
 
     @Test
     void getTransferById_ShouldReturnTransfer_WhenFound() {
-        when(transferRepository.findById(1L)).thenReturn(Optional.of(transfer));
+        when(transferRepository.findById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"))).thenReturn(Optional.of(transfer));
 
-        Optional<Transfer> foundTransfer = transferService.getTransferById(1L);
+        Optional<Transfer> foundTransfer = transferService.getTransferById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"));
 
         assertThat(foundTransfer).isPresent();
         assertThat(foundTransfer.get().getAmount()).isEqualTo(1000.0);
-        verify(transferRepository, times(1)).findById(1L);
+        verify(transferRepository, times(1)).findById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"));
     }
 
     @Test
     void getTransferById_ShouldReturnEmpty_WhenNotFound() {
-        when(transferRepository.findById(99L)).thenReturn(Optional.empty());
+        when(transferRepository.findById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000099999"))).thenReturn(Optional.empty());
 
-        Optional<Transfer> foundTransfer = transferService.getTransferById(99L);
+        Optional<Transfer> foundTransfer = transferService.getTransferById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000099999"));
 
         assertThat(foundTransfer).isEmpty();
-        verify(transferRepository, times(1)).findById(99L);
+        verify(transferRepository, times(1)).findById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000099999"));
     }
 
     @Test
@@ -98,58 +101,58 @@ class TransferServiceTest {
 
     @Test
     void deleteTransfer_ShouldDeleteTransfer() {
-        doNothing().when(transferRepository).deleteById(1L);
+        doNothing().when(transferRepository).deleteById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"));
 
-        transferService.deleteTransfer(1L);
+        transferService.deleteTransfer(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"));
 
-        verify(transferRepository, times(1)).deleteById(1L);
+        verify(transferRepository, times(1)).deleteById(UUID.fromString("1a2b3c4d-0001-0001-0001-000000000001"));
     }
 
     @Test
     void getTransfersBySourceAccountNumber_ShouldReturnTransfers_WhenAccountExists() {
-        when(accountRepository.findById("ACC123456")).thenReturn(Optional.of(sourceAccount));
+        when(accountRepository.findById("FR7630006000010000000000001")).thenReturn(Optional.of(sourceAccount));
         when(transferRepository.findBySourceAccount(sourceAccount)).thenReturn(List.of(transfer));
 
-        List<Transfer> transfers = transferService.getTransfersBySourceAccountNumber("ACC123456");
+        List<Transfer> transfers = transferService.getTransfersBySourceAccountNumber("FR7630006000010000000000001");
 
         assertThat(transfers).isNotEmpty().hasSize(1);
-        verify(accountRepository, times(1)).findById("ACC123456");
+        verify(accountRepository, times(1)).findById("FR7630006000010000000000001");
         verify(transferRepository, times(1)).findBySourceAccount(sourceAccount);
     }
 
     @Test
     void getTransfersBySourceAccountNumber_ShouldThrowException_WhenAccountDoesNotExist() {
-        when(accountRepository.findById("ACC999999")).thenReturn(Optional.empty());
+        when(accountRepository.findById("FR7630006000010000000099999")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> transferService.getTransfersBySourceAccountNumber("ACC999999"))
+        assertThatThrownBy(() -> transferService.getTransfersBySourceAccountNumber("FR7630006000010000000099999"))
                 .isInstanceOf(EntityExistsException.class)
-                .hasMessage("Le compte n°ACC999999 n'as pas été trouvé.");
+                .hasMessage("Le compte n°FR7630006000010000000099999 n'as pas été trouvé.");
 
-        verify(accountRepository, times(1)).findById("ACC999999");
+        verify(accountRepository, times(1)).findById("FR7630006000010000000099999");
         verifyNoInteractions(transferRepository);
     }
 
     @Test
     void getTransfersByDestinationAccountNumber_ShouldReturnTransfers_WhenAccountExists() {
-        when(accountRepository.findById("ACC654321")).thenReturn(Optional.of(destinationAccount));
+        when(accountRepository.findById("FR7630006000010000000000019")).thenReturn(Optional.of(destinationAccount));
         when(transferRepository.findByDestinationAccount(destinationAccount)).thenReturn(List.of(transfer));
 
-        List<Transfer> transfers = transferService.getTransfersByDestinationAccountNumber("ACC654321");
+        List<Transfer> transfers = transferService.getTransfersByDestinationAccountNumber("FR7630006000010000000000019");
 
         assertThat(transfers).isNotEmpty().hasSize(1);
-        verify(accountRepository, times(1)).findById("ACC654321");
+        verify(accountRepository, times(1)).findById("FR7630006000010000000000019");
         verify(transferRepository, times(1)).findByDestinationAccount(destinationAccount);
     }
 
     @Test
     void getTransfersByDestinationAccountNumber_ShouldThrowException_WhenAccountDoesNotExist() {
-        when(accountRepository.findById("ACC999999")).thenReturn(Optional.empty());
+        when(accountRepository.findById("FR7630006000010000000099999")).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> transferService.getTransfersByDestinationAccountNumber("ACC999999"))
+        assertThatThrownBy(() -> transferService.getTransfersByDestinationAccountNumber("FR7630006000010000000099999"))
                 .isInstanceOf(EntityExistsException.class)
-                .hasMessage("Le compte n°ACC999999 n'as pas été trouvé.");
+                .hasMessage("Le compte n°FR7630006000010000000099999 n'as pas été trouvé.");
 
-        verify(accountRepository, times(1)).findById("ACC999999");
+        verify(accountRepository, times(1)).findById("FR7630006000010000000099999");
         verifyNoInteractions(transferRepository);
     }
 }

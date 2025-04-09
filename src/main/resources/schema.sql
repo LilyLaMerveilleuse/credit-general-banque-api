@@ -2,21 +2,31 @@
 
 DROP TABLE IF EXISTS Transfer;
 DROP TABLE IF EXISTS Account;
+DROP TABLE IF EXISTS TransferStatus;
 
--- Création des comptes
-CREATE TABLE Account (
-                         account_Number VARCHAR(50) PRIMARY KEY,
-                         solde DOUBLE
+-- Table des états de transfert
+CREATE TABLE TransferStatus (
+                                 id UUID default random_uuid() PRIMARY KEY,
+                                 name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- Création des transfers
+-- Tables des comptes
+CREATE TABLE Account (
+                         iban VARCHAR(34) PRIMARY KEY,
+                         owner_name VARCHAR(100) NOT NULL,
+                         solde DOUBLE NOT NULL
+);
+
+-- Table des transferts
 CREATE TABLE Transfer (
-                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                          id UUID default random_uuid() PRIMARY KEY,
                           amount DOUBLE NOT NULL,
-                          transfer_Date DATE NOT NULL,
+                          transfer_date DATE NOT NULL,
                           description VARCHAR(255),
-                          source_Account_Number VARCHAR(50) NOT NULL,
-                          destination_Account_Number VARCHAR(50) NOT NULL,
-                          FOREIGN KEY (source_Account_Number) REFERENCES Account(account_Number),
-                          FOREIGN KEY (destination_Account_Number) REFERENCES Account(account_Number)
+                          status_id UUID,
+                          source_iban VARCHAR(34) NOT NULL,
+                          destination_iban VARCHAR(34) NOT NULL,
+                          FOREIGN KEY (status_id) REFERENCES TransferStatus(id),
+                          FOREIGN KEY (source_iban) REFERENCES Account(iban),
+                          FOREIGN KEY (destination_iban) REFERENCES Account(iban)
 );
