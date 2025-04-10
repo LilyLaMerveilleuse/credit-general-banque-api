@@ -12,6 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Component
@@ -46,5 +48,12 @@ public class TransferPostMapper {
             throw new EntityExistsException("Compte non trouvé avec ce numéro");
         }
         return transfer;
+    }
+    public List<Transfer> toEntities(List<TransferPostRecord> transferPostRecords) {
+        List<Transfer> transfers = new ArrayList<>();
+        for (TransferPostRecord transferPostRecord : transferPostRecords) {
+            transfers.add(toEntity(transferPostRecord));
+        }
+        return transfers;
     }
 }

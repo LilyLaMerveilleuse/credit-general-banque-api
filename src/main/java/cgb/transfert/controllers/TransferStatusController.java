@@ -1,11 +1,14 @@
 package cgb.transfert.controllers;
 
+import cgb.transfert.dtos.TransferStatusDTO;
 import cgb.transfert.entities.Transfer;
 import cgb.transfert.entities.TransferStatus;
+import cgb.transfert.mappers.TransferStatusDTOMapper;
 import cgb.transfert.records.TransferPostRecord;
 import cgb.transfert.records.TransferStatusPostRecord;
 import cgb.transfert.services.TransferService;
 import cgb.transfert.services.TransferStatusService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -19,26 +22,38 @@ import java.util.UUID;
 public class TransferStatusController {
 
     private final TransferStatusService transferStatusService;
+    private final TransferStatusDTOMapper transferStatusDTOMapper;
 
     @Autowired
-    public TransferStatusController(TransferStatusService transferStatusService) {
+    public TransferStatusController(TransferStatusService transferStatusService, TransferStatusDTOMapper transferStatusDTOMapper) {
         this.transferStatusService = transferStatusService;
+        this.transferStatusDTOMapper = transferStatusDTOMapper;
     }
 
     @GetMapping
-    public List<TransferStatus> getAllTransferStatuses() {
-        return transferStatusService.getAllTransferStatuses();
+    public List<TransferStatusDTO> getAllTransferStatuses() {
+        return transferStatusDTOMapper.toDTO(
+                transferStatusService.getAllTransferStatuses()
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransferStatus> getTransferStatusById(@PathVariable UUID id) {
+    public TransferStatusDTO getTransferStatusById(@PathVariable UUID id) {
         Optional<TransferStatus> transferStatus = transferStatusService.getTransferStatusById(id);
-        return transferStatus.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (transferStatus.isPresent()) {
+            return transferStatusDTOMapper.toDTO(
+                    transferStatus.get()
+            );
+        } else {
+            throw new EntityNotFoundException("Transfer status not found");
+        }
     }
 
     @PostMapping
-    public TransferStatus createTransferStatus(@RequestBody TransferStatusPostRecord transferStatus) {
-        return transferStatusService.saveTransferStatus(transferStatus);
+    public TransferStatusDTO createTransferStatus(@RequestBody TransferStatusPostRecord transferStatus) {
+        return transferStatusDTOMapper.toDTO(
+                transferStatusService.saveTransferStatus(transferStatus)
+        );
     }
 
     @DeleteMapping("/{id}")

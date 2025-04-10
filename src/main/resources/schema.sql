@@ -1,6 +1,7 @@
 -- Pour lancer ce script, modifier application.properties
 
 DROP TABLE IF EXISTS Transfer;
+DROP TABLE  IF EXISTS Beneficiaire;
 DROP TABLE IF EXISTS Account;
 DROP TABLE IF EXISTS TransferStatus;
 
@@ -10,11 +11,18 @@ CREATE TABLE TransferStatus (
                                  name VARCHAR(50) NOT NULL UNIQUE
 );
 
--- Tables des comptes
+-- Table des comptes
 CREATE TABLE Account (
                          iban VARCHAR(34) PRIMARY KEY,
                          owner_name VARCHAR(100) NOT NULL,
                          solde DOUBLE NOT NULL
+);
+
+-- Table des comptes de confiance
+CREATE TABLE Beneficiaire (
+                            iban_account VARCHAR(34),
+                            iban_beneficiaire VARCHAR(34),
+                            PRIMARY KEY (iban_account, iban_beneficiaire)
 );
 
 -- Table des transferts
@@ -24,6 +32,7 @@ CREATE TABLE Transfer (
                           transfer_date DATE NOT NULL,
                           description VARCHAR(255),
                           status_id UUID,
+                          lot_id UUID,
                           source_iban VARCHAR(34) NOT NULL,
                           destination_iban VARCHAR(34) NOT NULL,
                           FOREIGN KEY (status_id) REFERENCES TransferStatus(id),

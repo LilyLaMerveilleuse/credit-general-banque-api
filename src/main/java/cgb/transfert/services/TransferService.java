@@ -5,16 +5,17 @@ import cgb.transfert.entities.Transfer;
 import cgb.transfert.entities.TransferStatus;
 import cgb.transfert.enums.TransferStatusEnum;
 import cgb.transfert.mappers.TransferPostMapper;
+import cgb.transfert.records.TransferLotPostRecord;
+import cgb.transfert.records.TransferLotUnitRecord;
 import cgb.transfert.records.TransferPostRecord;
 import cgb.transfert.repositories.AccountRepository;
 import cgb.transfert.repositories.TransferRepository;
 import jakarta.persistence.EntityExistsException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TransferService {
@@ -42,20 +43,67 @@ public class TransferService {
         return transferRepository.findById(id);
     }
 
-    public Transfer saveTransfer(TransferPostRecord transferPost) {
-        Transfer transfer = transferPostMapper.toEntity(transferPost);
+    public Transfer saveTransfer(Transfer transfer) {
         Account sourceAccount = transfer.getSourceAccount();
         Account destinationAccount = transfer.getDestinationAccount();
         if (sourceAccount.getSolde() >= transfer.getAmount()) {
-            sourceAccount.setSolde(sourceAccount.getSolde() - transfer.getAmount());
-            destinationAccount.setSolde(destinationAccount.getSolde() + transfer.getAmount());
-            Optional<TransferStatus> status = transferStatusService.getTransferStatusByName(TransferStatusEnum.DONE.getLabel());
-            transfer.setStatus(status.orElseThrow());
+            if (sourceAccount.getBeneficiaires().contains(destinationAccount)) {
+                sourceAccount.setSolde(sourceAccount.getSolde() - transfer.getAmount());
+                destinationAccount.setSolde(destinationAccount.getSolde() + transfer.getAmount());
+                Optional<TransferStatus> status = transferStatusService.getTransferStatusByName(TransferStatusEnum.DONE.getLabel());
+                transfer.setStatus(status.orElseThrow());
+            } else {
+                Optional<TransferStatus> status = transferStatusService.getTransferStatusByName(TransferStatusEnum.UNAUTHORIZED.getLabel());
+                transfer.setStatus(status.orElseThrow());
+            }
         } else {
-            Optional<TransferStatus> status = transferStatusService.getTransferStatusByName(TransferStatusEnum.CANCELLED.getLabel());
+            Optional<TransferStatus> status = transferStatusService.getTransferStatusByName(TransferStatusEnum.ERROR.getLabel());
             transfer.setStatus(status.orElseThrow());
         }
         return transferRepository.save(transfer);
+    }
+
+    public List<TransferPostRecord> formatTransfers(TransferLotPostRecord transfers) {
+        List<TransferPostRecord> transferPostRecords = new ArrayList<>();
+        for (TransferLotUnitRecord transfer : transfers.transfers()){
+            transferPostRecords.add(
+                    new TransferPostRecord(
+                            transfer.amount(),
+                            transfer.description(),
+                            transfers.iban(),
+                            transfer.iban()
+                    )
+            );
+        }
+        return transferPostRecords;
+    }
+
+    public List<Transfer> saveTransfers(List<Transfer> transfers) {
+        UUID uuid = UUID.randomUUID();
+        List<Transfer> savedTransfers = new ArrayList<>();
+        for (Transfer transfer : transfers) {
+            transfer.setLotId(uuid);
+            savedTransfers.add(saveTransfer(transfer));
+        }
+        return savedTransfers;
+    }
+
+    @Transactional
+    public List<Transfer> saveTransfersWithRollback(List<TransferPostRecord> transferPosts) {
+        List<Transfer> transfers = new ArrayList<>();
+        for (TransferPostRecord transferPost : transferPosts) {
+            transfers.add(saveTransfer(transferPostMapper.toEntity(transferPost)));
+            if (transfers.getLast().getStatus().getName().equals(TransferStatusEnum.ERROR.getLabel())) {
+                throw new EntityExistsException("Le compte " + transfers.getLast().getSourceAccount().getIban() +
+                        " n'a pas assez de fond pour le transfer");
+            }
+            if (transfers.getLast().getStatus().getName().equals(TransferStatusEnum.UNAUTHORIZED.getLabel())) {
+                throw new EntityExistsException("Les compte " + transfers.getLast().getSourceAccount().getIban() +
+                        " essaye de faire une transaction au compte " + transfers.getLast().getDestinationAccount().getIban() +
+                        " qui n'est pas un compte autorisé.");
+            }
+        }
+        return transfers;
     }
 
     public void deleteTransfer(UUID id) {
@@ -78,5 +126,9 @@ public class TransferService {
         } else {
             throw new EntityExistsException("Le compte n°" + destinationAccountNumber + " n'as pas été trouvé.");
         }
+    }
+
+    public List<Transfer> getTransfersByLotId(UUID lotId) {
+        return transferRepository.findByLotId(lotId);
     }
 }

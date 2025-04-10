@@ -7,6 +7,7 @@ public enum TransferStatusEnum {
     NEW("Transfer créé"),
     ERROR("Erreur de transfer"),
     CANCELLED("Transfer annulé"),
+    UNAUTHORIZED("Transfer interdit"),
     DONE("Tranfer complété");
 
     private final String label;

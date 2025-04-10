@@ -13,4 +13,5 @@ import java.util.UUID;
 public interface TransferRepository extends JpaRepository<Transfer, UUID> {
     List<Transfer> findBySourceAccount(Account sourceAccount);
     List<Transfer> findByDestinationAccount(Account destinationAccount);
+    List<Transfer> findByLotId(UUID lotId);
 }

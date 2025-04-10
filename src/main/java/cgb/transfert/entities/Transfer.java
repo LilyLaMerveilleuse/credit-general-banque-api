@@ -19,6 +19,9 @@ public class Transfer {
     private LocalDate transfer_date;
     private String description;
 
+    @Column(name = "lot_id")
+    private UUID lotId;
+
     @ManyToOne
     @JoinColumn(name = "status_id", nullable = false)
     private TransferStatus status;

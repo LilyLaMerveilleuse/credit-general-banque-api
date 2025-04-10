@@ -1,8 +1,11 @@
 package cgb.transfert.controllers;
 
+import cgb.transfert.dtos.AccountDTO;
 import cgb.transfert.entities.Account;
+import cgb.transfert.mappers.AccountDTOMapper;
 import cgb.transfert.records.AccountPostRecord;
 import cgb.transfert.services.AccountService;
+import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,26 +18,38 @@ import java.util.Optional;
 public class AccountController {
 
     private final AccountService accountService;
+    private final AccountDTOMapper accountDTOMapper;
 
     @Autowired
-    public AccountController(AccountService accountService) {
+    public AccountController(AccountService accountService, AccountDTOMapper accountDTOMapper) {
         this.accountService = accountService;
+        this.accountDTOMapper = accountDTOMapper;
     }
 
     @GetMapping
-    public List<Account> getAllAccounts() {
-        return accountService.getAllAccounts();
+    public List<AccountDTO> getAllAccounts() {
+        return accountDTOMapper.toDTO(
+                accountService.getAllAccounts()
+        );
     }
 
     @GetMapping("/{accountNumber}")
-    public ResponseEntity<Account> getAccountByNumber(@PathVariable String accountNumber) {
+    public AccountDTO getAccountByNumber(@PathVariable String accountNumber) {
         Optional<Account> account = accountService.getAccountByNumber(accountNumber);
-        return account.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        if (account.isPresent()) {
+            return accountDTOMapper.toDTO(
+                    account.get()
+            );
+        } else {
+            throw new EntityNotFoundException("Le compte n°" + accountNumber + " n'a pas été trouvé");
+        }
     }
 
     @PostMapping
-    public Account createAccount(@RequestBody AccountPostRecord account) {
-        return accountService.saveAccount(account);
+    public AccountDTO createAccount(@RequestBody AccountPostRecord account) {
+        return accountDTOMapper.toDTO(
+                accountService.saveAccount(account)
+        );
     }
 
     @DeleteMapping("/{accountNumber}")

@@ -23,11 +23,6 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler(EntityExistsException.class)
-    public ResponseEntity<Object> handleEntityExistsException(EntityExistsException ex, WebRequest request) {
-        return getObjectResponseEntity(request, ex.getMessage(), ex);
-    }
-
     // Gère les exceptions générales
     @ExceptionHandler(Exception.class)
     public ResponseEntity<Object> handleGlobalException(Exception ex, WebRequest request) {
