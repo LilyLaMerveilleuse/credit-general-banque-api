@@ -1,5 +1,6 @@
 package cgb.transfert.entities;
 
+import cgb.transfert.annotations.ValidIban;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -13,11 +14,11 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"beneficiaires", "trustedBy"})
 @EqualsAndHashCode(of = "iban")
 public class Account {
     @Id
     @Column(name = "iban", nullable = false)
+    @ValidIban
     private String iban;
     private String owner_name;
 	private Double solde;

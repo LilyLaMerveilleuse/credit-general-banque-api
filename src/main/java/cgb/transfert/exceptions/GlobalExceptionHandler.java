@@ -1,8 +1,11 @@
 package cgb.transfert.exceptions;
 
 import jakarta.persistence.EntityExistsException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
@@ -10,6 +13,7 @@ import org.springframework.web.context.request.WebRequest;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -21,6 +25,19 @@ public class GlobalExceptionHandler {
         errorDetails.put("message", message);
         errorDetails.put("details", request.getDescription(false));
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    // Gère les exceptions des IBAN
+    @ExceptionHandler(TransactionSystemException.class)
+    public ResponseEntity<Object> transactionSystemException(TransactionSystemException ex, WebRequest request) {
+        Throwable cause = ex.getRootCause();
+        if (cause instanceof ConstraintViolationException){
+            ConstraintViolationException validationEx = (ConstraintViolationException) cause;
+            Set<ConstraintViolation<?>> violations = validationEx.getConstraintViolations();
+            String message = violations.iterator().next().getMessage();
+            return getObjectResponseEntity(request, message, ex);
+        }
+        return getObjectResponseEntity(request, ex.getMessage(), ex);
     }
 
     // Gère les exceptions générales

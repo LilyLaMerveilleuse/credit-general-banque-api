@@ -29,7 +29,7 @@ CREATE TABLE Beneficiaire (
 CREATE TABLE Transfer (
                           id UUID default random_uuid() PRIMARY KEY,
                           amount DOUBLE NOT NULL,
-                          transfer_date DATE NOT NULL,
+                          transfer_date TIMESTAMP NOT NULL,
                           description VARCHAR(255),
                           status_id UUID,
                           lot_id UUID,

@@ -1,7 +1,7 @@
 package cgb.transfert.entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import lombok.*;
@@ -16,7 +16,7 @@ public class Transfer {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     private Double amount;
-    private LocalDate transfer_date;
+    private LocalDateTime transfer_date;
     private String description;
 
     @Column(name = "lot_id")

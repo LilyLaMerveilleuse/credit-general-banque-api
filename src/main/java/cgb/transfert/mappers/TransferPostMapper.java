@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +28,7 @@ public class TransferPostMapper {
     public Transfer toEntity(TransferPostRecord transferPostRecord) {
         Transfer transfer = new Transfer();
         transfer.setAmount(transferPostRecord.amount());
-        transfer.setTransfer_date(LocalDate.now());
+        transfer.setTransfer_date(LocalDateTime.now());
         transfer.setDescription(transferPostRecord.description());
         Optional<TransferStatus> transferStatus = transferStatusRepository.findByName(TransferStatusEnum.NEW.getLabel());
         if (transferStatus.isPresent()) {
@@ -35,13 +36,13 @@ public class TransferPostMapper {
         } else {
             throw new EntityExistsException("Status de tranfer non trouvé");
         }
-        Optional<Account> sourceAccount = accountRepository.findById(transferPostRecord.sourceAccountNumber());
+        Optional<Account> sourceAccount = accountRepository.findById(transferPostRecord.ibanSource());
         if (sourceAccount.isPresent()) {
             transfer.setSourceAccount(sourceAccount.get());
         } else {
             throw new EntityExistsException("Compte non trouvé avec ce numéro");
         }
-        Optional<Account> destinationAccount = accountRepository.findById(transferPostRecord.destinationAccountNumber());
+        Optional<Account> destinationAccount = accountRepository.findById(transferPostRecord.ibanDestination());
         if (destinationAccount.isPresent()) {
             transfer.setDestinationAccount(destinationAccount.get());
         } else {

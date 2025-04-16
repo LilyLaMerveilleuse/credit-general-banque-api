@@ -1,5 +1,6 @@
 package cgb.transfert.dtos;
 
+import cgb.transfert.annotations.ValidIban;
 import cgb.transfert.entities.Account;
 import lombok.Getter;
 
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 
 @Getter
 public class AccountDTO {
+    @ValidIban
     private String iban;
     private String ownerName;
     private Double solde;
