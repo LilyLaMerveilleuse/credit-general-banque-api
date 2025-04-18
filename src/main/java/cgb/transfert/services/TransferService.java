@@ -13,6 +13,7 @@ import cgb.transfert.repositories.TransferRepository;
 import jakarta.persistence.EntityExistsException;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,15 +25,17 @@ public class TransferService {
     private final TransferPostMapper transferPostMapper;
     private final AccountRepository accountRepository;
     private final TransferStatusService transferStatusService;
+    private final CurrentUserService currentUserService;
 
 
     @Autowired
     public TransferService(TransferRepository transferRepository, TransferPostMapper transferPostMapper,
-                           AccountRepository accountRepository, TransferStatusService transferStatusService) {
+                           AccountRepository accountRepository, TransferStatusService transferStatusService, CurrentUserService currentUserService) {
         this.transferRepository = transferRepository;
         this.transferPostMapper = transferPostMapper;
         this.accountRepository = accountRepository;
         this.transferStatusService = transferStatusService;
+        this.currentUserService = currentUserService;
     }
 
     public List<Transfer> getAllTransfers() {
@@ -44,10 +47,13 @@ public class TransferService {
     }
 
     public Transfer saveTransfer(Transfer transfer) {
+        if (!currentUserService.getCurrentUser().getCustomer().getAccounts().contains(transfer.getSourceAccount())) {
+            throw new RuntimeException("Cet utilisateur ne possède pas le compte source");
+        }
         Account sourceAccount = transfer.getSourceAccount();
         Account destinationAccount = transfer.getDestinationAccount();
         if (sourceAccount.getSolde() >= transfer.getAmount()) {
-            if (sourceAccount.getBeneficiaires().contains(destinationAccount)) {
+            if (sourceAccount.getOwner().getBeneficiaryAccounts().contains(destinationAccount)) {
                 sourceAccount.setSolde(sourceAccount.getSolde() - transfer.getAmount());
                 destinationAccount.setSolde(destinationAccount.getSolde() + transfer.getAmount());
                 Optional<TransferStatus> status = transferStatusService.getTransferStatusByName(TransferStatusEnum.DONE.getLabel());
@@ -86,24 +92,6 @@ public class TransferService {
             savedTransfers.add(saveTransfer(transfer));
         }
         return savedTransfers;
-    }
-
-    @Transactional
-    public List<Transfer> saveTransfersWithRollback(List<TransferPostRecord> transferPosts) {
-        List<Transfer> transfers = new ArrayList<>();
-        for (TransferPostRecord transferPost : transferPosts) {
-            transfers.add(saveTransfer(transferPostMapper.toEntity(transferPost)));
-            if (transfers.getLast().getStatus().getName().equals(TransferStatusEnum.ERROR.getLabel())) {
-                throw new EntityExistsException("Le compte " + transfers.getLast().getSourceAccount().getIban() +
-                        " n'a pas assez de fond pour le transfer");
-            }
-            if (transfers.getLast().getStatus().getName().equals(TransferStatusEnum.UNAUTHORIZED.getLabel())) {
-                throw new EntityExistsException("Les compte " + transfers.getLast().getSourceAccount().getIban() +
-                        " essaye de faire une transaction au compte " + transfers.getLast().getDestinationAccount().getIban() +
-                        " qui n'est pas un compte autorisé.");
-            }
-        }
-        return transfers;
     }
 
     public void deleteTransfer(UUID id) {

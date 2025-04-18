@@ -3,15 +3,14 @@ package cgb.transfert.dtos;
 import cgb.transfert.annotations.ValidIban;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+@Getter
 public class TransferDTO {
     private UUID id;
     private Double amount;

@@ -2,7 +2,6 @@ package cgb.transfert.entities;
 
 import cgb.transfert.annotations.ValidIban;
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -20,15 +19,16 @@ public class Account {
     @Column(name = "iban", nullable = false)
     @ValidIban
     private String iban;
-    private String owner_name;
 	private Double solde;
 
-    @ManyToMany
-    @JoinTable(
-            name = "Beneficiaire",
-            joinColumns = @JoinColumn(name = "iban_account"),
-            inverseJoinColumns = @JoinColumn(name = "iban_beneficiaire")
-    )
-    @JsonManagedReference
-    private Set<Account> beneficiaires = new HashSet<>();
+    // Compte géré par un seul client
+    @ManyToOne
+    @JoinColumn(name = "owner_id")
+    @JsonBackReference("customer_accounts")
+    private Customer owner;
+
+    // Ce compte peut être bénéficiaire de plusieurs clients
+    @ManyToMany(mappedBy = "beneficiaryAccounts")
+    @JsonBackReference("beneficiary_accounts")
+    private Set<Customer> sourceCustomers = new HashSet<>();
 }

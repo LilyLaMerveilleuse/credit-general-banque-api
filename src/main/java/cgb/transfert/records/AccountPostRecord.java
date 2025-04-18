@@ -1,4 +1,6 @@
 package cgb.transfert.records;
 
-public record AccountPostRecord(String iban, String owner_name, Double solde) {
+import java.util.UUID;
+
+public record AccountPostRecord(String iban, Double solde, UUID customerId) {
 }
