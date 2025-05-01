@@ -11,6 +11,7 @@ import cgb.transfert.services.TransferStatusService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,6 +31,7 @@ public class TransferStatusController {
         this.transferStatusDTOMapper = transferStatusDTOMapper;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<TransferStatusDTO> getAllTransferStatuses() {
         return transferStatusDTOMapper.toDTO(
@@ -37,6 +39,7 @@ public class TransferStatusController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public TransferStatusDTO getTransferStatusById(@PathVariable UUID id) {
         Optional<TransferStatus> transferStatus = transferStatusService.getTransferStatusById(id);
@@ -49,6 +52,7 @@ public class TransferStatusController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public TransferStatusDTO createTransferStatus(@RequestBody TransferStatusPostRecord transferStatus) {
         return transferStatusDTOMapper.toDTO(
@@ -56,6 +60,7 @@ public class TransferStatusController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTransferStatus(@PathVariable UUID id) {
         transferStatusService.deleteTransferStatus(id);

@@ -33,4 +33,9 @@ public class Transfer {
     @ManyToOne
     @JoinColumn(name = "destination_iban", nullable = false)
     private Account destinationAccount;
+
+    @Override
+    public String toString() {
+        return "Id: " + id + " | Amount: " + amount + " | Date: " + transfer_date + " | Description: " + description + " | Lot: " + lotId + " | Status: " + status.getName();
+    }
 }

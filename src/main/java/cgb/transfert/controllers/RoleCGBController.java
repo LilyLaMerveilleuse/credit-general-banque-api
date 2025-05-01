@@ -7,6 +7,7 @@ import cgb.transfert.services.RoleCGBService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class RoleCGBController {
         this.roleCGBDTOMapper = roleCGBDTOMapper;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<RoleCGBDTO> getAllRolees() {
         return roleCGBDTOMapper.toDTO(
@@ -33,6 +35,7 @@ public class RoleCGBController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public RoleCGBDTO getRoleById(@PathVariable UUID id) {
         Optional<RoleCGB> role = roleCGBService.getRoleById(id);
@@ -45,6 +48,7 @@ public class RoleCGBController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRole(@PathVariable UUID id) {
         roleCGBService.deleteRole(id);

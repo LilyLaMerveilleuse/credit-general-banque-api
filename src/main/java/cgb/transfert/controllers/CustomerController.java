@@ -7,6 +7,7 @@ import cgb.transfert.services.CustomerService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class CustomerController {
         this.customerDTOMapper = customerDTOMapper;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<CustomerDTO> getAllCustomeres() {
         return customerDTOMapper.toDTO(
@@ -33,6 +35,7 @@ public class CustomerController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     public CustomerDTO getCustomerById(@PathVariable UUID id) {
         Optional<Customer> customer = customerService.getCustomerById(id);
@@ -45,6 +48,7 @@ public class CustomerController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteCustomer(@PathVariable UUID id) {
         customerService.deleteCustomer(id);

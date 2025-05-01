@@ -8,6 +8,7 @@ import cgb.transfert.services.AccountService;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,6 +27,7 @@ public class AccountController {
         this.accountDTOMapper = accountDTOMapper;
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     public List<AccountDTO> getAllAccounts() {
         return accountDTOMapper.toDTO(
@@ -33,6 +35,7 @@ public class AccountController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{accountNumber}")
     public AccountDTO getAccountByNumber(@PathVariable String accountNumber) {
         Optional<Account> account = accountService.getAccountByNumber(accountNumber);
@@ -45,6 +48,7 @@ public class AccountController {
         }
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public AccountDTO createAccount(@RequestBody AccountPostRecord account) {
         return accountDTOMapper.toDTO(
@@ -52,6 +56,7 @@ public class AccountController {
         );
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @DeleteMapping("/{accountNumber}")
     public ResponseEntity<Void> deleteAccount(@PathVariable String accountNumber) {
         accountService.deleteAccount(accountNumber);
