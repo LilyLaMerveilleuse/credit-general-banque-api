@@ -5,12 +5,15 @@ import cgb.transfert.entities.Transfer;
 import cgb.transfert.entities.TransferStatus;
 import cgb.transfert.entities.UserCGB;
 import cgb.transfert.enums.TransferStatusEnum;
+import cgb.transfert.handlers.LoggingInterceptor;
 import cgb.transfert.mappers.TransferPostMapper;
 import cgb.transfert.records.TransferLotPostRecord;
 import cgb.transfert.records.TransferLotUnitRecord;
 import cgb.transfert.records.TransferPostRecord;
 import cgb.transfert.repositories.AccountRepository;
 import cgb.transfert.repositories.TransferRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.AsyncResult;
 import org.springframework.stereotype.Service;
@@ -23,6 +26,8 @@ public class AsyncTransferService {
     private final TransferRepository transferRepository;
     private final TransferStatusService transferStatusService;
     private final EmailService emailService;
+
+    private static final Logger logger = LoggerFactory.getLogger(LoggingInterceptor.class);
 
     public AsyncTransferService(TransferRepository transferRepository, TransferStatusService transferStatusService, EmailService emailService) {
         this.transferRepository = transferRepository;
@@ -71,5 +76,6 @@ public class AsyncTransferService {
         emailService.sendEmail(user.getUsername(), "Envoi par lot N°" + uuid.toString(),
                 "L'envoi par lot est terminé! Il a effectué " + savedTransfers.size() +
                 " transfers. " + nbTransfersReussi + " transfers ont été effectués avec succès!");
+        logger.info("Transfer par lot N°"+uuid.toString()+" effectué");
     }
 }
