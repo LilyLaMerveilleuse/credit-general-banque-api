@@ -22,9 +22,9 @@ VALUES ('00000000-0000-0000-0000-000000000001', 'Alice Dupont', '1 rue des Lilas
 
 -- Insertion des utilisateurs
 insert into USERCGB (ID, USERNAME, PASSWORD, CUSTOMER_ID, ROLECGB_ID)
-values  ('57dbee6b-85a8-4ff2-8e41-cb9b8dcd1fd7', 'ceci-est-un-email-user@gmail.com', '$2a$10$zOlrriyYayHAs6fYPGEM5e0TGLwGyZrQ.RQPPrrtqfPOCDWOOlAAu', '00000000-0000-0000-0000-000000000003', 'aaa00000-0000-0000-0000-000000000003'),
-        ('74372035-9755-48cf-8d5e-824edd32b316', 'ceci-est-un-email-comptable@gmail.com', '$2a$10$peQX39ySwji0N5xITn5BdeVbHFEPVUIASKhA1zjPyO9Jjsj4DYZgS', '00000000-0000-0000-0000-000000000002', 'aaa00000-0000-0000-0000-000000000002'),
-        ('9a1b337f-33d2-48ae-aa35-690759a82ffd', 'ceci-est-un-email-admin@gmail.com', '$2a$10$GAAugIMvx6JeUskeEO7jSu5DdthCvF4HnTN04PI4/RoaGxpzTmLBa', '00000000-0000-0000-0000-000000000001', 'aaa00000-0000-0000-0000-000000000001');
+values  ('57dbee6b-85a8-4ff2-8e41-cb9b8dcd1fd7', 'ceci-est-un-email-user@gmail.com', '$2a$10$YsaTbEKhMibKSyBfDZp4.ey52YyJCEoMp50aPvs/.yItGd6ml1RW2', '00000000-0000-0000-0000-000000000003', 'aaa00000-0000-0000-0000-000000000003'),
+        ('74372035-9755-48cf-8d5e-824edd32b316', 'ceci-est-un-email-comptable@gmail.com', '$2a$10$YsaTbEKhMibKSyBfDZp4.ey52YyJCEoMp50aPvs/.yItGd6ml1RW2', '00000000-0000-0000-0000-000000000002', 'aaa00000-0000-0000-0000-000000000002'),
+        ('9a1b337f-33d2-48ae-aa35-690759a82ffd', 'ceci-est-un-email-admin@gmail.com', '$2a$10$YsaTbEKhMibKSyBfDZp4.ey52YyJCEoMp50aPvs/.yItGd6ml1RW2', '00000000-0000-0000-0000-000000000001', 'aaa00000-0000-0000-0000-000000000001');
 
 -- Insertion de 20 comptes avec des IBAN valides
 INSERT INTO Account (iban, solde, owner_id)
